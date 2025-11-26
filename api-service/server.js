@@ -16,12 +16,10 @@ app.use(express.json()); // Leer JSON del body
 // express.json(): convierte texto JSON a objeto JavaScript
 // Configurar conexión a base de datos
 const pool = new Pool({
-host: process.env.DB_HOST || 'postgres-db',
-port: 5432,
-database: 'crud_db',
-user: process.env.DB_USER,
-password: process.env.DB_PASS
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
+
 // Pool: grupo de conexiones reutilizables a la BD
 // GET /api/users - Obtener todos los usuarios
 app.get('/api/users', async (req, res) => {
@@ -76,12 +74,4 @@ res.status(500).json({ error: err.message });
 }
 });
 // Iniciar servidor en puerto 3000
-app.listen(PORT, () => {
-console.log(`Servidor corriendo en puerto ${PORT}`);
-});
-
-// Crear tabla si no existe (al iniciar)
-pool.query(`
-CREATE TABLE IF NOT EXISTS users (
-id SERIAL PRIMARY KEY, nombre TEXT, correo TEXT
-)`).then(() => console.log('Tabla users lista'));
+app.listen(PORT, () => console.log("API corriendo en Render ✔"));
