@@ -1,0 +1,34 @@
+# Blueprint para desplegar los servicios API y Nginx juntos en una red compartida.
+# Esto garantiza que 'nginx-gateway' pueda acceder a 'api-service'
+# usando su nombre de servicio como hostname.
+services:
+  # 1. Servicio API (crud-proyecto)
+  - type: web
+    name: crud-proyecto
+    env: docker
+    dockerfilePath: ./api-service/Dockerfile
+    # Usaremos el puerto 3000 como está definido en tu API
+    port: 3000
+    # El comando de inicio de tu Dockerfile debería ser suficiente
+    # command: node index.js 
+    
+    # IMPORTANTE: Configuración de la URL de la base de datos (usando la variable de Render)
+    # Debes sustituir el valor por la Internal Database URL de tu servicio crud-db.
+    envVars:
+      - key: DATABASE_URL
+        # Reemplaza [INTERNAL_DB_URL_AQUI] con el valor que copiaste en el paso 3 
+        # (p. ej., "postgres://user:pass@host/crud-db")
+        value: postgresql://crud_db_oiih_user:BufoSh8LI8OI0nsEiEC2vO8uje1twHwR@dpg-d4j8qn95pdvs739965lg-a/crud_db_oiih
+
+  # 2. Servicio Nginx Proxy (nginx-gateway)
+  - type: web
+    name: nginx-gateway
+    env: docker
+    dockerfilePath: ./nginx/Dockerfile
+    # El puerto que Nginx escuchará para el tráfico entrante (HTTP estándar)
+    port: 80
+    # Nginx necesita que la API esté lista antes de iniciar
+    dependsOn:
+      - crud-proyecto
+
+# Una vez que crees este archivo, Render detectará que quieres usar Blueprints.
